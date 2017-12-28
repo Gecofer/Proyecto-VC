@@ -1,11 +1,10 @@
 * Implementar la creación de panoramas lineales con proyección en superficies cilíndricas o esféricas y mezcla de colores usando el algoritmo de Burt-Adelson. (25 puntos)
 
-
 Podemos hacer las dos proyecciones, y ver las diferencias entre ellas.
 En la proyección cilíndrica, hay que contemplar que solo dibuje una
-vez la image, ya que cuando la distancia focal es corta (depende) del
-tamaño de la imagen, no lo hace bien. Escogeremos la proyección esferica
-que introduce menos deformación global, para hacer el mosaico. El mosaico
+vez la imagen, ya que cuando la distancia focal es corta (depende del
+tamaño de la imagen), no lo hace bien. Escogeremos la proyección esférica
+que introduce menos deformación global para hacer el mosaico. El mosaico
 no está hecho aún, falta arreglar los huecos negros que introduce cuando
 genera el mosaico. Lo que falla es el lado izquierdo del mosaico, el
 derecho creo que lo genera bien.
