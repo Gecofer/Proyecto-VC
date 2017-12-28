@@ -1,5 +1,5 @@
-* Implementar la creación de panoramas lineales con proyección en superficies cilíndricas
-o esféricas y mezcla de colores usando el algoritmo de Burt-Adelson. (25 puntos)
+* Implementar la creación de panoramas lineales con proyección en superficies cilíndricas o esféricas y mezcla de colores usando el algoritmo de Burt-Adelson. (25 puntos)
+
 
 Podemos hacer las dos proyecciones, y ver las diferencias entre ellas.
 En la proyección cilíndrica, hay que contemplar que solo dibuje una
