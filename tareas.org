@@ -43,6 +43,8 @@ Esta es la parte gorda del trabajo imagino.
 
 **** Referencias:
 http://persci.mit.edu/pub_pdfs/spline83.pdf
+
 https://www.cse.wustl.edu/~furukawa/cse559a/2016_fall/notes/06-1-stitching.pdf
+
 https://www.compuphase.com/panorama.pdf
 
