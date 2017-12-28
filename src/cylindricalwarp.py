@@ -27,8 +27,14 @@ def cylindrical_warp(img, f=20):
         )
 
     height, width = img.shape[:2]
-    print(height,width)
-    new_img = np.zeros(img.shape, dtype=np.uint8)
+
+    if f < 50:
+        new_img = np.zeros([220,200,3], dtype=np.uint8)
+        #print(new_img.shape)
+
+    else:
+        new_img = np.zeros(img.shape, dtype=np.uint8)
+        #print(new_img.shape)
 
     for row_index in range(len(img)):
         for col_index in range(len(img[0])):
@@ -115,7 +121,8 @@ def mosaicoN(lista_imagenes):
     # Definimos la traslacion que nos pone la imagen central del mosaico en el centro
     tras = np.matrix([[1, 0, lista_imagenes[centro].shape[1]], [0, 1, lista_imagenes[centro].shape[0]], [0, 0, 1]], dtype=np.float32)
     # Llevamos esa imagen al centro de nuestro mosaico con la homografia
-    mosaico = cv2.warpPerspective(src=lista_imagenes[centro], M=tras, dsize=(ancho, alto), borderMode=cv2.BORDER_TRANSPARENT)
+    mosaico = cv2.warpPerspective(src=lista_imagenes[centro], M=tras, dsize=(ancho, alto), flags= cv2.INTER_LINEAR,
+                                  borderMode=cv2.BORDER_TRANSPARENT)
 
     # Calculamos las homografias que se le aplican a las imagenes de la izquierda de la imagen central
     for i in range(0, centro):
@@ -127,7 +134,8 @@ def mosaicoN(lista_imagenes):
         for j in range(i, centro): izquierda = homografia[j] * izquierda
 
         # Las llevamos al mosaico
-        cv2.warpPerspective(src=lista_imagenes[i], M=tras*izquierda, dst=mosaico, dsize=(ancho, alto), borderMode=cv2.BORDER_TRANSPARENT)
+        cv2.warpPerspective(src=lista_imagenes[i], M=tras*izquierda, dst=mosaico, dsize=(ancho, alto), flags= cv2.INTER_LINEAR,
+                            borderMode=cv2.BORDER_TRANSPARENT)
 
     # Calculamos las homografias que se le aplican a las imagenes de la derecha de la imagen central
     # Ahora debemos usar las inversas de las homografías, ya que las homografias que se usan son de la imagen i a la i-1
@@ -140,12 +148,14 @@ def mosaicoN(lista_imagenes):
         for j in range(centro, i): derecha = derecha * np.linalg.inv(homografia[j])
 
         # Las llevamos al mosaico
-        cv2.warpPerspective(lista_imagenes[i], M=tras*derecha, dst=mosaico, dsize=(ancho, alto),borderMode=cv2.BORDER_TRANSPARENT)
+        cv2.warpPerspective(lista_imagenes[i], M=tras*derecha, dst=mosaico, dsize=(ancho, alto), flags= cv2.INTER_LINEAR,
+                            borderMode=cv2.BORDER_TRANSPARENT)
 
     return mosaico
 
 
 def test_warp():
+
     """Computes and displays a cylindrical warp over a white image"""
     img = np.ones((600, 600))
     mondrian = imread('../images/mondrian.jpg')
@@ -153,23 +163,27 @@ def test_warp():
     guernica2 = imread('../images/guernica2.jpg')
     guernica3 = imread('../images/guernica3.jpg')
     guernica4 = imread('../images/guernica4.jpg')
+    guernica5 = imread('../images/guernica5.jpg')
+    guernica6 = imread('../images/guernica6.jpg')
     mosaico002 = imread('../images/mosaico002.jpg')
     mosaico003 = imread('../images/mosaico003.jpg')
     mosaico004 = imread('../images/mosaico004.jpg')
     mosaico005 = imread('../images/mosaico005.jpg')
     mosaico006 = imread('../images/mosaico006.jpg')
 
-    show(cylindrical_warp(img, f=600))
-    show(cylindrical_warp(img, f=50))
+    #show(cylindrical_warp(img, f=600))
+    #show(cylindrical_warp(mondrian, f=50))
     #show(cylindrical_warp(mondrian, f=100))
 
-    imageA = cylindrical_warp(mosaico002, f=200)
-    imageB = cylindrical_warp(mosaico003, f=200)
-    imageC = cylindrical_warp(mosaico004, f=200)
-    imageD = cylindrical_warp(mosaico005, f=200)
-    imageE = cylindrical_warp(mosaico006, f=200)
+    imageA = cylindrical_warp(guernica1, f=700)
+    #show(cylindrical_warp(mosaico002, f=150))
+    imageB = cylindrical_warp(guernica2, f=700)
+    imageC = cylindrical_warp(guernica3, f=700)
+    imageD = cylindrical_warp(guernica4, f=700)
+    imageE = cylindrical_warp(guernica5, f=700)
 
+    #mosaico = mosaicoN([imageA, imageB, imageC])
     mosaico = mosaicoN([imageA, imageB, imageC, imageD, imageE])
-
-    #mosaico = mosaicoN([mosaico002, mosaico003, mosaico004])
     show(mosaico)
+
+
