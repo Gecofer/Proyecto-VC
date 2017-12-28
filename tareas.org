@@ -1,0 +1,29 @@
+Implementar la creación de panoramas lineales con proyección en superficies cilíndricas
+o esféricas y mezcla de colores usando el algoritmo de Burt-Adelson. (25 puntos)
+
+* Pasos del algoritmo
+
+1. Realizar proyecciones cilíndricas
+2. Encontrar los puntos SIFT y las homografías para hacer el mosaico
+   (tal como se hizo en la práctica) sobre las imágenes proyectadas.
+3. Corregir el color usando el algoritmo de Burt-Adelson,
+   para ello tenemos que hacer la pirámide Laplaciana
+   (tema 4 "7.Panoramas", página 24 y 57)
+
+** Proyección cilíndrica
+No sé muy bien por qué hay que hacer esto. Quizá cuando se está
+tratando de hacer un mosaico de una imagen que abarca un ángulo
+muy grande se notan muchos las distorsiones a menos que se proyecten
+las fotos sobre una superficie cilíndrica.
+
+En principio está hecha. Habría que ver cómo hacer la proyección
+sobre la esfera pero debe ser fácil.
+
+** Encontrar puntos SIFT
+
+** Corrección del color
+Esta es la parte gorda del trabajo imagino.
+
+
+Referencias:
+http://persci.mit.edu/pub_pdfs/spline83.pdf
