@@ -155,35 +155,22 @@ def mosaicoN(lista_imagenes):
 
 
 def test_warp():
-
     """Computes and displays a cylindrical warp over a white image"""
+
     img = np.ones((600, 600))
     mondrian = imread('../images/mondrian.jpg')
-    guernica1 = imread('../images/guernica1.jpg')
-    guernica2 = imread('../images/guernica2.jpg')
-    guernica3 = imread('../images/guernica3.jpg')
-    guernica4 = imread('../images/guernica4.jpg')
-    guernica5 = imread('../images/guernica5.jpg')
-    guernica6 = imread('../images/guernica6.jpg')
-    mosaico002 = imread('../images/mosaico002.jpg')
-    mosaico003 = imread('../images/mosaico003.jpg')
-    mosaico004 = imread('../images/mosaico004.jpg')
-    mosaico005 = imread('../images/mosaico005.jpg')
-    mosaico006 = imread('../images/mosaico006.jpg')
 
-    #show(cylindrical_warp(img, f=600))
-    #show(cylindrical_warp(mondrian, f=50))
-    #show(cylindrical_warp(mondrian, f=100))
+    guernicas = [
+        imread('../images/guernica{}.jpg'.format(str(i)))
+        for i in range(1, 7)
+    ]
 
-    imageA = cylindrical_warp(guernica1, f=700)
-    #show(cylindrical_warp(mosaico002, f=150))
-    imageB = cylindrical_warp(guernica2, f=700)
-    imageC = cylindrical_warp(guernica3, f=700)
-    imageD = cylindrical_warp(guernica4, f=700)
-    imageE = cylindrical_warp(guernica5, f=700)
+    warped_guernicas = [
+        cylindrical_warp(guernica, f=700)
+        for guernica in guernicas
+    ]
 
-    #mosaico = mosaicoN([imageA, imageB, imageC])
-    mosaico = mosaicoN([imageA, imageB, imageC, imageD, imageE])
+    mosaico = mosaicoN(warped_guernicas)
     show(mosaico)
 
 
