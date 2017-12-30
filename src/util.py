@@ -23,5 +23,9 @@ def plot_images(imgs):
     plt.tight_layout()
     plt.show()
 
-show = lambda img: plot_images([Image(img=img, title='Image')])
+def show(*images):
+    plot_images([
+        Image(img=img, title='Image')
+        for img in images
+    ])
 
