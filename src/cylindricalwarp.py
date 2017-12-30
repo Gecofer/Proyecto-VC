@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from matplotlib.pyplot import imread
 
-from math import floor, tan, sqrt, floor
+from math import floor, sqrt
 from util import plot_images, Image, show
 
 def cylindrical_warp(img, f=20):
@@ -13,40 +13,39 @@ def cylindrical_warp(img, f=20):
 
     def convert_coordinates(new_point, new_shape, f, r):
 
+        # r=f gives less distortion
+
         y, x = (
-            new_point[0] - new_shape[0]//2,
-            new_point[1] - new_shape[1]//2
+            new_point[0] - new_shape[0]/2,
+            new_point[1] - new_shape[1]/2
         )
 
-        new_y = y * sqrt(1 + tan(x / f) ** 2)
-        new_x = f * tan(x / f)
+        #new_y = y * sqrt(1 + tan(x / f) ** 2)
+        new_y = f * ( y / sqrt(x**2 + f**2))
+        #new_x = f * tan(x / f)
+        new_x = f * np.arctan(x / f)
 
         return (
             floor(new_y) + new_shape[0]//2,
             floor(new_x) + new_shape[1]//2
         )
 
+    # Obtenemos el ancho y el alto de la imagen
     height, width = img.shape[:2]
 
-    if f < 50:
-        new_img = np.zeros([220,200,3], dtype=np.uint8)
-        #print(new_img.shape)
+    new_img = np.zeros(img.shape, dtype=np.uint8)
 
-    else:
-        new_img = np.zeros(img.shape, dtype=np.uint8)
-        #print(new_img.shape)
+    for i in range(len(img)):
+        for j in range(len(img[0])):
 
-    for row_index in range(len(img)):
-        for col_index in range(len(img[0])):
             y, x = convert_coordinates(
-                (row_index, col_index),
+                (i, j),
                 img.shape[:2],
                 f,
                 f
             )
 
-            if 0 <= x < width and 0 < y < height:
-                new_img[row_index, col_index] = img[y, x]
+            new_img[y, x] = img[i, j]
 
     return new_img
 
@@ -189,6 +188,7 @@ def test_warp():
     mondrian = imread('../images/mondrian.jpg')
 
     show(cylindrical_warp(img, f=600))
+    show(cylindrical_warp(mondrian, f=20))
     show(cylindrical_warp(mondrian, f=400))
 
 def test_guernica():

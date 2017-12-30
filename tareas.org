@@ -42,9 +42,16 @@ Esta es la parte gorda del trabajo imagino.
 
 
 **** Referencias:
-http://persci.mit.edu/pub_pdfs/spline83.pdf
-
+http://pages.cpsc.ucalgary.ca/~brosz/research/projection/panorama.pdf
+https://www.compuphase.com/panorama.pdf
+https://www.pan3sixty.co.uk/blog/services/360-panoramas/cylindrical-panroamas-spherical-panoramas-or-full-spherical-panroamas/
+http://pages.cs.wisc.edu/~vmathew/cs766-proj2/index.html
 https://www.cse.wustl.edu/~furukawa/cse559a/2016_fall/notes/06-1-stitching.pdf
 
-https://www.compuphase.com/panorama.pdf
+http://persci.mit.edu/pub_pdfs/spline83.pdf
+
+Páginas para obtener las coordenadas de la proyección cilíndrica:
+- https://www.csie.ntu.edu.tw/~cyy/courses/vfx/10spring/lectures/handouts/lec07_stitching_4up.pdf
+- https://www.cs.toronto.edu/~urtasun/courses/CV/lecture08.pdf
+
 
