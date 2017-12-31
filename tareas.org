@@ -1,15 +1,8 @@
 * Implementar la creación de panoramas lineales con proyección en superficies cilíndricas o esféricas y mezcla de colores usando el algoritmo de Burt-Adelson. (25 puntos)
 
 Podemos hacer las dos proyecciones, y ver las diferencias entre ellas.
-En la proyección cilíndrica, hay que contemplar que solo dibuje una
-vez la imagen, ya que cuando la distancia focal es corta (depende del
-tamaño de la imagen), no lo hace bien. Escogeremos la proyección esférica
-que introduce menos deformación global para hacer el mosaico. El mosaico
-no está hecho aún, falta arreglar los huecos negros que introduce cuando
-genera el mosaico. Lo que falla es el lado izquierdo del mosaico, el
-derecho creo que lo genera bien.
-- Mosaico Facultad con distancia focal 200.
-- Mosaico Guernica con distancia focal 700.
+Escogeremos la proyección esférica que introduce menos deformación global
+(para hacer el mosaico).
 
 ** Pasos del algoritmo
 
@@ -24,22 +17,22 @@ derecho creo que lo genera bien.
 No sé muy bien por qué hay que hacer esto. Quizá cuando se está
 tratando de hacer un mosaico de una imagen que abarca un ángulo
 muy grande se notan muchos las distorsiones a menos que se proyecten
-las fotos sobre una superficie cilíndrica.
-(arreglar cuando la distancia focal es pequeña)
-
-En principio está hecha. Habría que ver cómo hacer la proyección
-sobre la esfera pero debe ser fácil.
+las fotos sobre una superficie cilíndrica. Del libro de Szeliski las
+coordenadas de la proyección cilíndrica son la formula 9.13 y 9.14.
 
 *** Proyección esférica
 Respuesta del profesor: Valoraré lo que hagais. En principio si
 elegis una mejor la esferica que introduce menos deformación global.
+Del libro de Szeliski las coordenadas de la proyección esférica
+son la formula 9.18 y 9.19.
 
 *** Encontrar puntos SIFT
-Mirar función de "mosaicoN()"
+Mirar función de "mosaic()". Probar con mosaicos de tamaño más pequeño.
 
-*** Corrección del color
-Esta es la parte gorda del trabajo imagino.
-
+*** Corrección del color (algoritmo de Burt-Adelson)
+P. J. Burt and E. H. Adelson, “A multiresolution spline with applications to image mosaics,”
+ACM Transactions on Graphics, vol. 2, no. 4, pp. 217–236, October 1983.
+http://persci.mit.edu/pub_pdfs/spline83.pdf
 
 **** Referencias:
 http://pages.cpsc.ucalgary.ca/~brosz/research/projection/panorama.pdf
@@ -48,10 +41,6 @@ https://www.pan3sixty.co.uk/blog/services/360-panoramas/cylindrical-panroamas-sp
 http://pages.cs.wisc.edu/~vmathew/cs766-proj2/index.html
 https://www.cse.wustl.edu/~furukawa/cse559a/2016_fall/notes/06-1-stitching.pdf
 
-http://persci.mit.edu/pub_pdfs/spline83.pdf
-
 Páginas para obtener las coordenadas de la proyección cilíndrica:
 - https://www.csie.ntu.edu.tw/~cyy/courses/vfx/10spring/lectures/handouts/lec07_stitching_4up.pdf
 - https://www.cs.toronto.edu/~urtasun/courses/CV/lecture08.pdf
-
-
