@@ -29,10 +29,25 @@ son la formula 9.18 y 9.19.
 *** Encontrar puntos SIFT
 Mirar función de "mosaic()". Probar con mosaicos de tamaño más pequeño.
 
-*** Corrección del color (algoritmo de Burt-Adelson)
+*** Corrección del color (algoritmo de Burt-Adelson):
+Queremos obtener una imagen donde la parte izquierda sea de una imagen y la
+parte de la derecha sea otra, en donde el centro tenga una combinar suave.
+Para ello usamos el algoritmo de Burt-Adelson el cual se usa para combinar
+las imágenes de acuerdo con los pesos.
+
+1. Build Laplacian pyramids LA and LB from images A and B
+2. Build a Gaussian pyramidGR from selected region R
+   (Construcción de la pirámide Gaussiana de una máscara.)
+3. Form a combined pyramid LS from LA and LB using nodes of GR as weights:
+        LS(i,j) = GR(I,j,)*LA(I,j) + (1-GR(I,j))*LB(I,j)
+4. Collapse the LS pyramid to get the final blended image
+
+Proceso mirado en: http://graphics.cs.cmu.edu/courses/15-463/2005_fall/www/Lectures/Pyramids.pdf
+
 P. J. Burt and E. H. Adelson, “A multiresolution spline with applications to image mosaics,”
 ACM Transactions on Graphics, vol. 2, no. 4, pp. 217–236, October 1983.
 http://persci.mit.edu/pub_pdfs/spline83.pdf
+
 
 **** Referencias:
 http://pages.cpsc.ucalgary.ca/~brosz/research/projection/panorama.pdf
@@ -40,6 +55,9 @@ https://www.compuphase.com/panorama.pdf
 https://www.pan3sixty.co.uk/blog/services/360-panoramas/cylindrical-panroamas-spherical-panoramas-or-full-spherical-panroamas/
 http://pages.cs.wisc.edu/~vmathew/cs766-proj2/index.html
 https://www.cse.wustl.edu/~furukawa/cse559a/2016_fall/notes/06-1-stitching.pdf
+
+http://persci.mit.edu/pub_pdfs/pyramid83.pdf
+http://cs.haifa.ac.il/hagit/courses/ip/Lectures/Ip11_MultiscaleRepx4.pdf
 
 Páginas para obtener las coordenadas de la proyección cilíndrica:
 - https://www.csie.ntu.edu.tw/~cyy/courses/vfx/10spring/lectures/handouts/lec07_stitching_4up.pdf
