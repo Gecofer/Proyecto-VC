@@ -4,7 +4,21 @@ import numpy as np
 from math import floor, sqrt
 
 def burt_adelson(imgA, imgB, mask):
-    pass
+    gaussian_mask = compute_gaussian_pyramid(mask, levels=4)
+    lAs = compute_laplacian_pyramid(imgA)
+    lBs = compute_laplacian_pyramid(imgB)
+    
+    lSs = []
+    for lA, lB, GR in zip(lAs, lBs, gaussian_mask):
+        lSs.append(
+            cv2.addWeighted(
+                lA, GR,
+                lB, 1 - GR,
+                0
+            )
+        )
+
+    return lSs
 
 def compute_laplacian_pyramid(img, levels=4):
     g_pyramid = compute_gaussian_pyramid(img, levels)

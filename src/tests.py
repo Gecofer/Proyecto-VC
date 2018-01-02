@@ -70,6 +70,11 @@ def test_mosaic():
 
     show(mosaic(guernicas))
 
+def test_burt_adelson():
+    guernica1 = imread("../images/guernica1.jpg")
+    guernica2 = imread("../images/guernica2.jpg")
+    
+
 
 def test_gaussian_pyramid():
     guernica = imread('../images/guernica3.jpg')
@@ -79,3 +84,4 @@ def test_gaussian_pyramid():
 def test_laplacian_pyramid():
     guernica = imread('../images/guernica3.jpg')
     show(*compute_laplacian_pyramid(guernica))
+

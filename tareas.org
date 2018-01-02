@@ -49,6 +49,32 @@ ACM Transactions on Graphics, vol. 2, no. 4, pp. 217–236, October 1983.
 http://persci.mit.edu/pub_pdfs/spline83.pdf
 
 
+**** Adaptación del algoritmo
+Según entiendo, la región R es una imagen binaria que contiene
+un 1 allí donde hay que mezclar las imágenes y un 0 donde no hay que
+mezclar las imágenes. El paper interpreta que a la izquierda de los
+1s va a ponerse la primera imagen y a la derecha la segunda.
+
+Esto no va a funcionar en nuestro caso ya que la mezcla de las
+dos imágenes no va a estar separada por una línea vertical (como
+en el caso de la manzana y la naranja). Necesitamos saber en qué
+porción de la nueva imagen vamos a tener exclusivamente
+los puntos de la imagen A y en qué porción exclusivamente los de B.
+Para esto podemos usar una estructura similar a la máscara binaria
+que utilizamos para señalar qué puntos de la imagen se mezclan.
+
+Tal como lo imagino podríamos tener `mascara_a`, `r` y `mascara_b`
+donde un 1 en `mascara_a` significa que el pixel se va a coger
+de la imagen A, un 1 en `r` significa que el pixel se va a mezclar
+(tal como dice el algoritmo de burt-adelson normal) y un `1` en
+`mascara_b` significa que el pixel se va a coger de la imagen B. (En
+realidad no hace falta guardar `mascara_b` en memoria porque para cada
+pixel va a haber una y solo una de las tres máscaras activadas).
+
+Para calcular estas máscaras a la hora de hacer el mosaico habrá que
+ver en qué puntos de la imagen global acaban nuestras imágenes mediante
+las homografías.
+
 **** Referencias:
 http://pages.cpsc.ucalgary.ca/~brosz/research/projection/panorama.pdf
 https://www.compuphase.com/panorama.pdf
