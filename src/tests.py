@@ -4,7 +4,7 @@ from matplotlib.pyplot import imread
 from warps import cylindrical_warp, spherical_warp
 from mosaic import mosaic
 from util import show, plot_images, Image
-
+from burt_adelson import compute_gaussian_pyramid, compute_laplacian_pyramid
 
 def test_warp():
     """Computes and displays a cylindrical warp over a white image"""
@@ -71,4 +71,11 @@ def test_mosaic():
     show(mosaic(guernicas))
 
 
+def test_gaussian_pyramid():
+    guernica = imread('../images/guernica3.jpg')
+    
+    show(*compute_gaussian_pyramid(guernica))
 
+def test_laplacian_pyramid():
+    guernica = imread('../images/guernica3.jpg')
+    show(*compute_laplacian_pyramid(guernica))
