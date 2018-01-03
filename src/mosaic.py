@@ -128,6 +128,7 @@ def compute_homographies(imgs):
     """Calcula las homografias entre una lista de imagenes contiguas"""
     sift = cv2.xfeatures2d.SIFT_create()
 
+    # calculamos las correspondencias
     matcher = cv2.BFMatcher(
         normType=cv2.NORM_L2,
         crossCheck=True
