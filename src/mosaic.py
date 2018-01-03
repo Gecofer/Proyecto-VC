@@ -4,8 +4,13 @@ import numpy as np
 from burt_adelson import burt_adelson
 from util import show
 
+
 def mosaic(imgs):
     """Situa en un mosaico una lista de imagenes contiguas"""
+
+    # en vez de superponer las imágenes se realiza una
+    # mezcla con el algoritmo burt_adelson
+
     homographies = compute_homographies(imgs)
 
     # comenzamos la creacion del mosaico
@@ -52,6 +57,8 @@ def mosaic(imgs):
             size
         )
 
+        # usaremos la mascara para generar los pesos de cada imagen
+        # para cada pixel de una nueva piŕamide Laplaciana
         maskA = (canvas > 0).astype(np.float64)
         maskB = (tmp_canvas > 0).astype(np.float64)
 
@@ -69,6 +76,8 @@ def mosaic(imgs):
 
     homography = tras
 
+    # pegamos las imagenes por la derecha
+    # empezamos por la central y hasta la última
     for img_index in range(center + 1, len(imgs)):
         # se acumula la homografia. Hay que calcular
         # la inversa porque nuestra homografia lleva de
@@ -85,12 +94,15 @@ def mosaic(imgs):
             size
         )
 
+        # nos quedamos pixel a pixel con el  mayor
+        # de ambos canvas. Si un pixel esta a negro
+        # en una imagen y no en la otra, no nos
+        # quedamos con el negro
         canvas = np.where(
             canvas > tmp_canvas,
             canvas,
             tmp_canvas
         )
-
 
     return canvas
 
@@ -131,11 +143,9 @@ def compute_homographies(imgs):
         kps, desc = sift.detectAndCompute(img, mask=None)
         keypoints.append(kps)
         descriptors.append(desc)
-        
 
     keypoints = np.array(keypoints)
     descriptors = np.array(descriptors)
-
 
     # calculamos las homografias entre cada par
     # de imagenes contiguas
