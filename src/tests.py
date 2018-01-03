@@ -6,8 +6,9 @@ from mosaic import mosaic
 from util import show, plot_images, Image
 from burt_adelson import compute_gaussian_pyramid, compute_laplacian_pyramid
 
+
 def test_warp():
-    """Computes and displays a cylindrical warp over a white image"""
+    """Computes and displays a cylindrical and spherical warp over a white image"""
     img = np.ones((600, 600))
     mondrian = imread('../images/mondrian.jpg')
 
@@ -23,6 +24,7 @@ def test_warp():
     show(spherical_warp(mondrian, f=370))
 
 def test_guernica_cylindrical():
+    """Computes and displays a cylindrical warp over a image guernica"""
     guernicas = [
         imread('../images/guernica{}.jpg'.format(str(i)))
         for i in range(1, 7)
@@ -43,13 +45,14 @@ def test_guernica_cylindrical():
     show(mosaico)
 
 def test_guernica_spherical():
+    """Computes and displays a spherical warp over a image guernica"""
     guernicas = [
         imread('../images/guernica{}.jpg'.format(str(i)))
         for i in range(1, 7)
     ]
 
     warped_guernicas = [
-        spherical_warp(guernica, f=600)
+        spherical_warp(guernica, f=1000)
         for guernica in guernicas
     ]
 
@@ -63,6 +66,7 @@ def test_guernica_spherical():
     show(mosaico)
 
 def test_mosaic():
+    """Computes and displays a mosaic"""
     guernicas = [
         imread('../images/guernica{}.jpg'.format(str(i)))
         for i in range(1, 7)
@@ -71,17 +75,19 @@ def test_mosaic():
     show(mosaic(guernicas))
 
 def test_burt_adelson():
+    """Computes and displays the algorith Burt and Adelson"""
     guernica1 = imread("../images/guernica1.jpg")
     guernica2 = imread("../images/guernica2.jpg")
     
 
 
 def test_gaussian_pyramid():
+    """Computes and displays a gaussian pyramid"""
     guernica = imread('../images/guernica3.jpg')
     
     show(*compute_gaussian_pyramid(guernica))
 
 def test_laplacian_pyramid():
+    """Computes and displays a laplacian pyramid"""
     guernica = imread('../images/guernica3.jpg')
     show(*compute_laplacian_pyramid(guernica))
-
