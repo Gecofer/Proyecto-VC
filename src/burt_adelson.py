@@ -3,7 +3,12 @@ import numpy as np
 
 from math import floor, sqrt
 
+
+# Implementación: https://github.com/stheakanath/multiresolutionblend/blob/master/main.py
+
 def burt_adelson(imgA, imgB, maskA, maskB):
+    """Algoritmo de Burt-Adelson"""
+
     # sacamos en que parte de la imagen nueva
     # estan activas ambas imagenes
     shared_mask = maskA * maskB
@@ -40,11 +45,29 @@ def burt_adelson(imgA, imgB, maskA, maskB):
         # añadimos la nueva componente a la lista de componentes
         lSs.append(new_component)
 
-
     # aqui habria que recomponer las componentes de la laplaciana
     # lSs en una sola imagen
 
     return lSs
+
+'''
+    # creamos la imagen que contendrá la
+    # combinación de la imagen A y B
+    recomponer_image = np.empty(imgA.shape)
+    
+    # reconstruimos la imagen desde el nivel 
+    # n hasta el nivel 0
+    for lS in lSs:
+        recomponer_image.append(lS + (lS.shape[0], lS.shape[1]))
+        
+    imagen_final = recomponer_image
+	
+	# normalizamos la imagen
+	
+	return imagen_final
+'''
+
+
 
 def compute_laplacian_pyramid(img, levels=4):
     g_pyramid = compute_gaussian_pyramid(img, levels)
