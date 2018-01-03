@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 
+from burt_adelson import burt_adelson
+from util import show
+
 def mosaic(imgs):
     """Situa en un mosaico una lista de imagenes contiguas"""
     homographies = compute_homographies(imgs)
@@ -48,6 +51,13 @@ def mosaic(imgs):
             homography,
             size
         )
+
+        maskA = canvas > 0
+        maskB = tmp_canvas > 0
+
+        import pdb; pdb.set_trace()
+
+        show(*burt_adelson(canvas, tmp_canvas, maskA, maskB))
 
         # nos quedamos pixel a pixel con el  mayor
         # de ambos canvas. Si un pixel esta a negro
