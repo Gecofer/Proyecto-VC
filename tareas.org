@@ -1,5 +1,12 @@
 * Implementar la creación de panoramas lineales con proyección en superficies cilíndricas o esféricas y mezcla de colores usando el algoritmo de Burt-Adelson. (25 puntos)
 
+DUDA: Cuando tenemos las imágenes de la manzana y la naranja, la máscara
+es una imagen donde la mitad es de una imagen y la mitad es de la otra.
+En nuestro caso no nos sirve, ya que no sabemos la parte común de
+las imágenes a combinar. Por eso obtenemos la máscara a mano. Pero,
+¿por qué necesitamos dos máscaras? Con una valdría.
+
+
 Podemos hacer las dos proyecciones, y ver las diferencias entre ellas.
 Escogeremos la proyección esférica que introduce menos deformación global
 (para hacer el mosaico).
