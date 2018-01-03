@@ -4,40 +4,45 @@ import numpy as np
 from math import floor, sqrt
 
 def burt_adelson(imgA, imgB, maskA, maskB):
-    shared_mask = (maskA & maskB).astype(float)
-    maskA = maskA.astype(float)
-    maskB = maskB.astype(float)
+    # sacamos en que parte de la imagen nueva
+    # estan activas ambas imagenes
+    shared_mask = maskA * maskB
 
+    # obtenemos la piramide gaussiana de la mascara
+    # compartida y de la mascara de A y de B
     gaussian_mask = compute_gaussian_pyramid(shared_mask, levels=4)
     masksA = compute_gaussian_pyramid(maskA, levels=4)
     masksB = compute_gaussian_pyramid(maskB, levels=4)
 
+    # calculamos la piramide laplaciana de las imagenes
+    # A y B
     lAs = compute_laplacian_pyramid(imgA)
     lBs = compute_laplacian_pyramid(imgB)
     
     lSs = []
     for lA, lB, GR, mA, mB in zip(lAs, lBs, gaussian_mask, masksA, masksB):
+        # creamos la componente que albergará la
+        # suma ponderada de las componentes de A y B
         new_component = np.zeros(lA.shape)
         
-        new_component = np.where(
-            mA > 0.5,
-            lA,
-            new_component
-        )
+        # allá donde la mascara de A esté activa copiamos
+        # la componente de A
+        np.copyto(new_component, lA, where=mA > 0.5)
+        # allá donde la mascara de B esté activa copiamos
+        # la componente de B
+        np.copyto(new_component, lB, where=mB > 0.5)
 
-        new_component = np.where(
-            mB > 0.5,
-            lB,
-            new_component
-        )
-
-        new_component = np.where(
-            GR,
-            lA * GR + lB * (1 - GR),
-            new_component
-        )
+        # alla donde ambas componentes activas copiamos la
+        # mezcla ponderada tal como especifica el algoritmo de
+        # burt-adelson
+        np.copyto(new_component, lA * GR + lB * (1 - GR), where=GR > 0)
         
+        # añadimos la nueva componente a la lista de componentes
         lSs.append(new_component)
+
+
+    # aqui habria que recomponer las componentes de la laplaciana
+    # lSs en una sola imagen
 
     return lSs
 

@@ -52,10 +52,8 @@ def mosaic(imgs):
             size
         )
 
-        maskA = canvas > 0
-        maskB = tmp_canvas > 0
-
-        import pdb; pdb.set_trace()
+        maskA = (canvas > 0).astype(np.float64)
+        maskB = (tmp_canvas > 0).astype(np.float64)
 
         show(*burt_adelson(canvas, tmp_canvas, maskA, maskB))
 
