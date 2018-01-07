@@ -58,19 +58,11 @@ def mosaic(imgs):
 
         # usaremos la mascara para generar los pesos de cada imagen
         # para cada pixel de una nueva piŕamide Laplaciana
-        mask = (canvas == 0).astype(np.float64)
+        mask = (canvas > 0).astype(np.float64)
 
-        show(*burt_adelson(canvas, tmp_canvas, mask))
+        show(burt_adelson(canvas, tmp_canvas, mask))
 
-        # nos quedamos pixel a pixel con el  mayor
-        # de ambos canvas. Si un pixel esta a negro
-        # en una imagen y no en la otra, no nos
-        # quedamos con el negro
-        canvas = np.where(
-            canvas > tmp_canvas,
-            canvas,
-            tmp_canvas
-        )
+        canvas = burt_adelson(canvas, tmp_canvas, mask)
 
     homography = tras
 
@@ -92,15 +84,8 @@ def mosaic(imgs):
             size
         )
 
-        # nos quedamos pixel a pixel con el  mayor
-        # de ambos canvas. Si un pixel esta a negro
-        # en una imagen y no en la otra, no nos
-        # quedamos con el negro
-        canvas = np.where(
-            canvas > tmp_canvas,
-            canvas,
-            tmp_canvas
-        )
+        mask = (canvas > 0).astype(np.float64)
+        canvas = burt_adelson(canvas, tmp_canvas, mask)
 
     return canvas
 

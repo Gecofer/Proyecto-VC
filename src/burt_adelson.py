@@ -16,17 +16,22 @@ def burt_adelson(imgA, imgB, mask):
     lAs = compute_laplacian_pyramid(imgA.astype(np.float64)/255)
     lBs = compute_laplacian_pyramid(imgB.astype(np.float64)/255)
     
-    lSs = [
-        l
-    ]
+    
+    lSs = []
+    
     for lA, lB, GR in zip(lAs, lBs, gaussian_mask):
-        lSs.append(lA * GR + lB * (1 - GR))
-        
+        r = lA * GR + lB * (1 - GR)
+        show(lA, lB, GR, lA * GR, lB * (1 - GR), r)
+        lSs.append(r)
 
+
+
+
+    result = collapse_laplacian_pyramid(lSs)
     # aqui habria que recomponer las componentes de la laplaciana
     # lSs en una sola imagen
 
-    return lSs
+    return result
 
 '''
     # creamos la imagen que contendrá la
@@ -60,7 +65,22 @@ def compute_laplacian_pyramid(img, levels=4):
             ))/255
         )
 
+    # añadimos el último nivel de la gaussiana
+    pyramid.append(np.float64(g_pyramid[-1]) / 255)
+
     return pyramid
+
+def collapse_laplacian_pyramid(pyramid):
+    result = np.zeros(pyramid[-1].shape)
+
+    for img in reversed(pyramid):
+        height, width = img.shape[:2]
+
+        import pdb; pdb.set_trace()
+        result = cv2.addWeighted(img, 1, result[:height, :width], 1, 0)
+        result = cv2.pyrUp(result)
+    
+    return result
 
 def compute_gaussian_pyramid(img, levels=4):
     pyramid = [img]
