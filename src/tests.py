@@ -69,7 +69,7 @@ def test_mosaic():
     """Computes and displays a mosaic"""
     guernicas = [
         imread('../images/guernica{}.jpg'.format(str(i)))
-        for i in range(1, 7)
+        for i in range(1, 3)
     ]
 
     show(mosaic(guernicas))

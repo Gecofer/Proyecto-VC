@@ -2,48 +2,26 @@ import cv2
 import numpy as np
 
 from math import floor, sqrt
-
+from util import show
 
 # Implementación: https://github.com/stheakanath/multiresolutionblend/blob/master/main.py
 
-def burt_adelson(imgA, imgB, maskA, maskB):
+def burt_adelson(imgA, imgB, mask):
     """Algoritmo de Burt-Adelson"""
 
-    # sacamos en que parte de la imagen nueva
-    # estan activas ambas imagenes
-    shared_mask = maskA * maskB
-
-    # obtenemos la piramide gaussiana de la mascara
-    # compartida y de la mascara de A y de B
-    gaussian_mask = compute_gaussian_pyramid(shared_mask, levels=4)
-    masksA = compute_gaussian_pyramid(maskA, levels=4)
-    masksB = compute_gaussian_pyramid(maskB, levels=4)
+    gaussian_mask = compute_gaussian_pyramid(mask, levels=4)
 
     # calculamos la piramide laplaciana de las imagenes
     # A y B
-    lAs = compute_laplacian_pyramid(imgA)
-    lBs = compute_laplacian_pyramid(imgB)
+    lAs = compute_laplacian_pyramid(imgA.astype(np.float64)/255)
+    lBs = compute_laplacian_pyramid(imgB.astype(np.float64)/255)
     
-    lSs = []
-    for lA, lB, GR, mA, mB in zip(lAs, lBs, gaussian_mask, masksA, masksB):
-        # creamos la componente que albergará la
-        # suma ponderada de las componentes de A y B
-        new_component = np.zeros(lA.shape)
+    lSs = [
+        l
+    ]
+    for lA, lB, GR in zip(lAs, lBs, gaussian_mask):
+        lSs.append(lA * GR + lB * (1 - GR))
         
-        # allá donde la mascara de A esté activa copiamos
-        # la componente de A
-        np.copyto(new_component, lA, where=mA > 0.5)
-        # allá donde la mascara de B esté activa copiamos
-        # la componente de B
-        np.copyto(new_component, lB, where=mB > 0.5)
-
-        # alla donde ambas componentes activas copiamos la
-        # mezcla ponderada tal como especifica el algoritmo de
-        # burt-adelson
-        np.copyto(new_component, lA * GR + lB * (1 - GR), where=GR > 0)
-        
-        # añadimos la nueva componente a la lista de componentes
-        lSs.append(new_component)
 
     # aqui habria que recomponer las componentes de la laplaciana
     # lSs en una sola imagen
@@ -67,8 +45,6 @@ def burt_adelson(imgA, imgB, maskA, maskB):
 	return imagen_final
 '''
 
-
-
 def compute_laplacian_pyramid(img, levels=4):
     g_pyramid = compute_gaussian_pyramid(img, levels)
     pyramid = []
@@ -77,11 +53,11 @@ def compute_laplacian_pyramid(img, levels=4):
         height, width = imgIzq.shape[:2]
 
         pyramid.append(
-            cv2.addWeighted(
-                imgIzq, 1,
-                cv2.pyrUp(imgDer)[:height, :width], -1,
+            np.float64(cv2.addWeighted(
+                np.uint8(imgIzq * 255), 1,
+                np.uint8(cv2.pyrUp(imgDer)[:height, :width] * 255), -1,
                 0
-            )
+            ))/255
         )
 
     return pyramid

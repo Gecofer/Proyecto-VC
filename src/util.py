@@ -21,6 +21,7 @@ def plot_images(imgs):
 
     plt.tight_layout()
     plt.show()
+    plt.close()
 
 def show(*images):
     plot_images([

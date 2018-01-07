@@ -4,7 +4,6 @@ import numpy as np
 from burt_adelson import burt_adelson
 from util import show
 
-
 def mosaic(imgs):
     """Situa en un mosaico una lista de imagenes contiguas"""
 
@@ -59,10 +58,9 @@ def mosaic(imgs):
 
         # usaremos la mascara para generar los pesos de cada imagen
         # para cada pixel de una nueva piŕamide Laplaciana
-        maskA = (canvas > 0).astype(np.float64)
-        maskB = (tmp_canvas > 0).astype(np.float64)
+        mask = (canvas == 0).astype(np.float64)
 
-        show(*burt_adelson(canvas, tmp_canvas, maskA, maskB))
+        show(*burt_adelson(canvas, tmp_canvas, mask))
 
         # nos quedamos pixel a pixel con el  mayor
         # de ambos canvas. Si un pixel esta a negro
