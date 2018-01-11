@@ -21,7 +21,7 @@ def mosaic(imgs):
     height = imgs[0].shape[0] * 2
 
     size = height, width
-    canvas = np.zeros(size + (3,), dtype=np.float32)
+    canvas = np.zeros(size + (3,), dtype=np.uint8)
 
     # el indice de la imagen que situaremos en el centro
     center = len(imgs) // 2
@@ -58,8 +58,9 @@ def mosaic(imgs):
 
         # usaremos la mascara para generar los pesos de cada imagen
         # para cada pixel de una nueva piŕamide Laplaciana
-        mask = (canvas > 0).astype(np.float64)
+        mask = (canvas > 0).astype(np.uint8) * 255
 
+        print('showing')
         show(burt_adelson(canvas, tmp_canvas, mask))
 
         canvas = burt_adelson(canvas, tmp_canvas, mask)

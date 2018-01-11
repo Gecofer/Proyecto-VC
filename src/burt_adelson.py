@@ -9,97 +9,81 @@ from matplotlib.pyplot import imread
 # Implementación: https://github.com/stheakanath/multiresolutionblend/blob/master/main.py
 # Implementación: https://docs.opencv.org/3.1.0/dc/dff/tutorial_py_pyramids.html
 
+def compute_gaussian(img, levels=4):
+    pyramid = []
+    acc = img
 
-def compute_gaussian_pyramid(img, levels=6):
-    downsampled = img.copy()
-    pyramid = [downsampled]
-
-    for i in range(levels):
-        downsampled = cv2.pyrDown(downsampled)
-        pyramid.append(downsampled)
-
-    return pyramid
-
-
-def compute_laplacian_pyramid(img, levels=6):
-
-    laplacian = compute_gaussian_pyramid(img, levels)
-    pyramid = [laplacian[-1]]
-
-    for i in range(5,0,-1):
-    #for i in range(len(laplacian)-1)[::-1]:
-        GE = cv2.pyrUp(laplacian[i])
-        L = cv2.subtract(laplacian[i-1],GE)
-        pyramid.append(L)
+    for _ in range(levels):
+        acc = cv2.pyrDown(acc)
+        pyramid.append(acc)
 
     return pyramid
 
-def collapse_laplacian_pyramid(pyramid):
+compute_gaussian_pyramid = compute_gaussian
 
+def compute_laplacian(img, levels=4):
+    g_pyramid = compute_gaussian(img)
+    pyramid = []
 
-    result = np.zeros(pyramid[-1].shape)
+    for imgIzq, imgDer in zip(g_pyramid, g_pyramid[1:]):
+        pyramid.append(imgIzq - cv2.pyrUp(imgDer))
+        
+    return pyramid
 
-    for img in reversed(pyramid):
-        height, width = img.shape[:2]
+compute_laplacian_pyramid = compute_laplacian
 
-        result = cv2.addWeighted(img, 1, result[:height, :width], 1, 0)
-        result = cv2.pyrUp(result)
+def blend_pipeline(imgA, imgB, mask):
+    gpA = compute_gaussian(imgA)
+    gpB = compute_gaussian(imgB)
+    gpMask = compute_gaussian(mask)
 
-    return result
-    '''
-    lS = pyramid[0]
+    lAs = compute_laplacian(imgA)
+    lBs = compute_laplacian(imgB)
 
-    for i in range(1,6):
-        lS = cv2.pyrUp(lS)
-        lS = cv2.add(lS, pyramid[i])
+    lSs = []
 
-    return lS
-    '''
+    for lA, lB, G in zip(lAs, lBs, gpMask):
+        lSs.append(G * lA + (1-G) * lB)
 
-def combine_laplacian_pyramids(laplacianA, laplacianB, gaussianMask):
-    blend = []
+    return collapse(lSs)
 
-    for lS in range(len(laplacianB)):
-        blend.append(gaussianMask[lS]*laplacianA[lS] + (1-gaussianMask[lS])*laplacianB[lS])
+def collapse(pyramid):
+    prev = pyramid[-1]
 
-    return blend
+    for img in reversed(pyramid[:-1]):
+        height, width = img.shape
+        prev = cv2.pyrUp(prev)
+        prev = img + prev[:height, :width]
 
+    return prev
+
+collapse_laplacian_pyramid = collapse
 
 def burt_adelson(imgA, imgB, mask):
+    # Convert to double and normalize the images to the range [0..1]
+    # to avoid arithmetic overflow issues
+    imgA = np.atleast_3d(imgA).astype(np.float) / 255.
+    imgB = np.atleast_3d(imgB).astype(np.float) / 255.
+    mask = np.atleast_3d(mask).astype(np.float) / 255.
+    num_channels = imgB.shape[-1]
 
-    # Step la. Build Laplacian pyramids LA and LB
-    # for images A and B respectively.
-    lAs = compute_laplacian_pyramid(imgA)
-    lBs = compute_laplacian_pyramid(imgB)
+    imgs = []
 
-    # Step lb. Build a Gaussian pyramid GR for the
-    # region image R.
-    gaussian_mask = compute_gaussian_pyramid(mask,
-                                             levels=4)
+    for channel in range(num_channels):
+        v = blend_pipeline(
+            imgA[:, :, channel],
+            imgB[:, :, channel],
+            mask[:, :, channel]
+        )
+        imgs.append(v)
 
-    # Step 2. Form a combined pyramid LS from LA and LB
-    # using nodes of GR as weights. That is, for each l, i and j:
-    pyramid = combine_laplacian_pyramids(lAs, lBs, gaussian_mask)
-    '''
-    lSs = []
-    for lA, lB, GR in zip(lAs, lBs, gaussian_mask):
-        r = lA * GR + lB * (1 - GR)
-        show(lA, lB, GR, lA * GR, lB * (1 - GR), r)
-        lSs.append(r)
-    '''
-    # aqui habria que recomponer las componentes de la laplaciana
-    img_blend = collapse_laplacian_pyramid(pyramid)
+    imgs = zip(*imgs)
+    imgs = np.dstack(imgs).transpose(2, 1, 0)
 
-    return img_blend
-
-
-def test_laplacian_pyramid():
-    """Computes and displays a laplacian pyramid"""
-    guernica = imread('../images/guernica3.jpg')
-    pyr = compute_laplacian_pyramid(guernica)
-    reconstructed = collapse_laplacian_pyramid(pyr)
-    show(*pyr, reconstructed)
-
-if __name__ == "__main__":
-    test_laplacian_pyramid()
-
+    return cv2.normalize(
+        imgs,
+        dst=None,
+        alpha=0,
+        beta=255,
+        norm_type=cv2.NORM_MINMAX
+    )
