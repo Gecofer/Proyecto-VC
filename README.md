@@ -50,6 +50,12 @@
 
    Mat mosaic = BurtAdelson(expanded_im1, expanded_im2, mask);
 
+   Todo lo que he modificado está en el el archivo *mosaic.py*, no he tocado el *tests.py*
+   Además uso las imágenes de la Alhambra, para ver hacer el mosaico, ya que pienso que los colores
+   y la iluminación es más diferente que la de Guernica.
+
+3. He añadido otra imagen para generar el mosaico *flores.jpg*, donde creo que hay buenos cambios de colores.
+
 
 
 
