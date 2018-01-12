@@ -9,7 +9,7 @@ from matplotlib.pyplot import imread
 # Implementación: https://github.com/stheakanath/multiresolutionblend/blob/master/main.py
 # Implementación: https://docs.opencv.org/3.1.0/dc/dff/tutorial_py_pyramids.html
 
-def compute_gaussian(img, levels=4):
+def compute_gaussian(img, levels=6):
     pyramid = []
     acc = img
 
@@ -21,7 +21,7 @@ def compute_gaussian(img, levels=4):
 
 compute_gaussian_pyramid = compute_gaussian
 
-def compute_laplacian1(img, levels=4):
+def compute_laplacian1(img, levels=6):
     g_pyramid = compute_gaussian(img)
     pyramid = []
 
@@ -31,11 +31,11 @@ def compute_laplacian1(img, levels=4):
     return pyramid
 
 # laplacian de tutorial OpenCV
-def compute_laplacian(img, levels=4):
+def compute_laplacian(img, levels=6):
     laplacian = compute_gaussian(img, levels)
-    pyramid = [laplacian[3]]
+    pyramid = [laplacian[5]]
 
-    for i in range(3,0,-1):
+    for i in range(5,0,-1):
         GE = cv2.pyrUp(laplacian[i])
         L = cv2.subtract(laplacian[i-1],GE)
         pyramid.append(L)
