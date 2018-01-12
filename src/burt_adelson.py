@@ -21,7 +21,7 @@ def compute_gaussian(img, levels=4):
 
 compute_gaussian_pyramid = compute_gaussian
 
-def compute_laplacian(img, levels=4):
+def compute_laplacian1(img, levels=4):
     g_pyramid = compute_gaussian(img)
     pyramid = []
 
@@ -29,6 +29,18 @@ def compute_laplacian(img, levels=4):
         pyramid.append(imgIzq - cv2.pyrUp(imgDer))
         
     return pyramid
+
+# laplacian de tutorial OpenCV
+def compute_laplacian(img, levels=4):
+    laplacian = compute_gaussian(img, levels)
+    pyramid = [laplacian[3]]
+
+    for i in range(3,0,-1):
+        GE = cv2.pyrUp(laplacian[i])
+        L = cv2.subtract(laplacian[i-1],GE)
+        pyramid.append(L)
+
+    return pyramid[::-1]
 
 compute_laplacian_pyramid = compute_laplacian
 
@@ -51,7 +63,7 @@ def collapse(pyramid):
     prev = pyramid[-1]
 
     for img in reversed(pyramid[:-1]):
-        height, width = img.shape
+        height, width = img.shape[:2]
         prev = cv2.pyrUp(prev)
         prev = img + prev[:height, :width]
 
@@ -75,11 +87,15 @@ def burt_adelson(imgA, imgB, mask):
             imgB[:, :, channel],
             mask[:, :, channel]
         )
+        # los tres primero salen bien, pero el ultimo no
+        # show(v)
         imgs.append(v)
 
     imgs = zip(*imgs)
     imgs = np.dstack(imgs).transpose(2, 1, 0)
 
+    # si normalizas sale mal
+    '''
     return cv2.normalize(
         imgs,
         dst=None,
@@ -87,3 +103,36 @@ def burt_adelson(imgA, imgB, mask):
         beta=255,
         norm_type=cv2.NORM_MINMAX
     )
+    '''
+    return imgs
+
+
+# para leer en blanco y negro pongo un 0
+# y para leer en color pongo un 1 y
+# la linea de cv2.cvtColor
+orange = cv2.imread("../images/orange.jpg", 1)
+orange = cv2.cvtColor(orange, cv2.COLOR_BGR2RGB)
+apple = cv2.imread("../images/apple.jpg", 1)
+apple = cv2.cvtColor(apple, cv2.COLOR_BGR2RGB)
+mask = cv2.imread("../images/mask.jpg", 1)
+mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
+
+# con blanco y negro sale bien
+# show(burt_adelson(orange, apple, mask))
+
+# con esto obtengo la salida que ayer viste
+# se diferencia algo con colores saturados
+#show(blend_pipeline(orange, apple, mask))
+
+# con esto la salida es mala
+# comprobar último nivel de las pirámides
+# show(burt_adelson(orange, apple, mask))
+
+
+# CON ESTO LA SALIDA ES BUENA Y USO
+# (compute_laplacian) DE OPENCV TUTORIAL
+show(burt_adelson(orange, apple, mask))
+
+
+
+
