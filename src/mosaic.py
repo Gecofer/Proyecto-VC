@@ -1,8 +1,13 @@
 import cv2
 import numpy as np
 
+from matplotlib.pyplot import imread
+
 from burt_adelson import burt_adelson
 from util import show
+
+# Implementacion para la mascara: https://docs.opencv.org/3.0.0/d0/d86/tutorial_py_image_arithmetics.html
+
 
 def mosaic(imgs):
     """Situa en un mosaico una lista de imagenes contiguas"""
@@ -60,7 +65,12 @@ def mosaic(imgs):
         # para cada pixel de una nueva piŕamide Laplaciana
         mask = (canvas > 0).astype(np.uint8) * 255
 
-        print('showing')
+        #mask = cv2.addWeighted(canvas,0.7,tmp_canvas,0.3,0)
+
+        print(mask)
+        show(mask)
+
+        print("showing")
         show(burt_adelson(canvas, tmp_canvas, mask))
 
         canvas = burt_adelson(canvas, tmp_canvas, mask)
@@ -157,3 +167,11 @@ def compute_homographies(imgs):
         homographies.append(homography)
 
     return homographies
+
+
+guernicas = [
+    imread('../images/guernica{}.jpg'.format(str(i)))
+    for i in range(1, 3)
+]
+
+show(mosaic(guernicas))
