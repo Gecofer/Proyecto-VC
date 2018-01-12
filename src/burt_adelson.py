@@ -10,7 +10,7 @@ from matplotlib.pyplot import imread
 # Implementación: https://docs.opencv.org/3.1.0/dc/dff/tutorial_py_pyramids.html
 
 def compute_gaussian(img, levels=6):
-    pyramid = []
+    pyramid = [img]
     acc = img
 
     for _ in range(levels):
@@ -37,7 +37,8 @@ def compute_laplacian(img, levels=6):
 
     for i in range(5,0,-1):
         GE = cv2.pyrUp(laplacian[i])
-        L = cv2.subtract(laplacian[i-1],GE)
+        height, width = laplacian[i-1].shape
+        L = cv2.subtract(laplacian[i-1],GE[:height, :width])
         pyramid.append(L)
 
     return pyramid[::-1]
@@ -131,7 +132,7 @@ mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
 
 # CON ESTO LA SALIDA ES BUENA Y USO
 # (compute_laplacian) DE OPENCV TUTORIAL
-show(burt_adelson(orange, apple, mask))
+#show(burt_adelson(orange, apple, mask))
 
 
 
