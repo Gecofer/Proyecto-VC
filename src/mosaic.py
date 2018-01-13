@@ -6,8 +6,57 @@ from matplotlib.pyplot import imread
 from burt_adelson import burt_adelson
 from util import show
 
-# Implementacion para la mascara: https://docs.opencv.org/3.0.0/d0/d86/tutorial_py_image_arithmetics.html
+def compute_largest_rectangle(mask):
+    non_empty_cols = (mask > 0).any(axis=(0, 2))
+    non_empty_rows = (mask > 0).any(axis=(1, 2))
 
+    l = np.argwhere(non_empty_rows)
+    first_row = l[0][0]
+    last_row = l[-1][0]
+
+    l = np.argwhere(non_empty_cols)
+    first_col = l[0][0]
+    last_col = l[-1][0]
+
+    room = -10
+    return first_row+room, last_row-room, first_col+room-20, last_col-room+20
+
+
+def get_mask_from_corners(size, arriba, abajo):
+    mask = np.uint8(
+        cv2.fillConvexPoly(
+            np.zeros(size),
+            np.array(arriba + abajo[::-1]),
+            color=255
+        )
+    )
+
+    mask = np.array([mask, mask, mask]).transpose(1, 2, 0)
+
+    return mask
+
+def get_half_mask(first_row, last_row, first_col, last_col):
+    white = np.ones((
+        (last_row-first_row),
+        (last_col-first_col)//2
+    )) *255
+
+    black = np.zeros((
+        (last_row-first_row),
+        (last_col-first_col) - (last_col-first_col)//2
+    ))
+
+    mask_to_mix = np.hstack(
+        (black, white)
+    ).astype(np.uint8)
+    mask_to_mix = np.array([mask_to_mix]*3).transpose(1, 2, 0)
+
+    return mask_to_mix
+
+def float_image_to_uint8(img):
+    return np.uint8(img* 255)
+
+# Implementacion para la mascara: https://docs.opencv.org/3.0.0/d0/d86/tutorial_py_image_arithmetics.html
 
 def mosaic(imgs):
     """Situa en un mosaico una lista de imagenes contiguas"""
@@ -31,7 +80,8 @@ def mosaic(imgs):
     # el indice de la imagen que situaremos en el centro
     center = len(imgs) // 2
     center_img = imgs[center]
-    center_height, center_width = center_img.shape[:2]
+    center_size = center_img.shape[:2]
+    center_height, center_width = center_size
 
     # la traslacion al centro de la imagen
     tras = translation_matrix(
@@ -41,6 +91,17 @@ def mosaic(imgs):
 
     # colocamos la imagen central
     canvas = perspective(center_img, tras, size)
+    # aqui llevaremos un canvas con colores mal mezclados
+    # para compararlos luego y sacar la imagen en la memoria
+    canvas2 = np.copy(canvas)
+    
+    # aqui iremos haciendo calculos temporales
+    canvas_ = np.copy(canvas)
+    canvas_[:, :, :] = 0
+
+    # aqui llevaremos las esquinas de las imagenes para conocer
+    # que region ocupan dentro del canvas
+    arriba, abajo = compute_corner_coordinates(tras, center_size)
 
     # pegamos las imagenes por la izquierda
     # empezamos por la inmediatamente a la izquierda
@@ -55,25 +116,94 @@ def mosaic(imgs):
             homographies[img_index]
         )
 
+        # la nueva imagen a pegar colocada en un marco negro
         tmp_canvas = perspective(
             imgs[img_index],
             homography,
             size
         )
 
-        # usaremos la mascara para generar los pesos de cada imagen
-        # para cada pixel de una nueva piŕamide Laplaciana
-        mask = (canvas > 0).astype(np.uint8) * 255
+        # obtenemos las esquinas de la nueva imagen
+        current_img_corners_arriba, current_img_corners_abajo = \
+            compute_corner_coordinates(
+                homography,
+                imgs[img_index].shape[:2]
+            )
 
-        #mask = cv2.addWeighted(canvas,0.7,tmp_canvas,0.3,0)
+        # esta es la máscara que controla en qué parte del canvas está
+        # el mosaico acumulado
+        mask = get_mask_from_corners(size, arriba, abajo)
+        
+        # esta máscara controla la parte del canvas donde está
+        # la nueva imagen colocada
+        tmp_mask = get_mask_from_corners(
+            size,
+            current_img_corners_arriba,
+            current_img_corners_abajo
+        )
 
-        print(mask)
-        show(mask)
+        # sacamos el mínimo de ambas máscaras, lo que mide
+        # por tanto la zona de intersección de ambas imágenes
+        shared_mask = np.where(
+            mask < tmp_mask,
+            mask,
+            tmp_mask
+        )
 
-        print("showing")
-        show(burt_adelson(canvas, tmp_canvas, mask))
+        # obtenemos las esquinas de un rectángulo horizontal
+        # contenido dentro de la intersección. Es en este
+        # rectángulo donde haremos Burt-Adelson
+        first_row, last_row, first_col, last_col = \
+            compute_largest_rectangle(shared_mask)
 
-        canvas = burt_adelson(canvas, tmp_canvas, mask)
+        # subimagen del mosaico acumulado donde haremos
+        # burt-adelson
+        canvas_to_mix = canvas[
+            first_row:last_row,
+            first_col:last_col
+        ]
+
+        # subimagen del nuevo canvas donde haremos burt-adelson
+        tmp_canvas_to_mix = tmp_canvas[
+            first_row:last_row,
+            first_col:last_col
+        ]
+
+        # en el canvas resultado podemos pegar todo lo que tenemos
+        # fuera de la zona donde vamos a hacer burt-adelson
+        canvas_[:, :first_col+3] = tmp_canvas[:, :first_col+3]
+        canvas_[:, last_col-3:] = canvas[:, last_col-3:]
+
+
+        # obtenemos una máscara que divide por la mitad
+        # la subimagen en la que vamos a hacer burt-adelson
+        mask_to_mix = get_half_mask(
+            first_row,
+            last_row,
+            first_col,
+            last_col
+        )
+
+        # hacemos burt-adelson en la subimagen determinada
+        roi = float_image_to_uint8(
+            burt_adelson(
+                canvas_to_mix,
+                tmp_canvas_to_mix,
+                mask_to_mix
+            )
+        )
+
+        
+        canvas2 = np.where(canvas2 > tmp_canvas, canvas2, tmp_canvas)
+
+        # actualizamos el canvas con la zona burt-adelson
+        canvas_[first_row:last_row, first_col:last_col] = roi
+
+        canvas = canvas_
+
+        # añadimos las esquinas de la última imagen a la lista
+        arriba = [current_img_corners_arriba[0]] + arriba
+        abajo = [current_img_corners_abajo[0]] + abajo
 
     homography = tras
 
@@ -89,16 +219,120 @@ def mosaic(imgs):
             np.linalg.inv(homographies[img_index - 1])
         )
         
+        # la nueva imagen a colocar colocada en un marco negro
         tmp_canvas = perspective(
             imgs[img_index],
             homography,
             size
         )
 
-        mask = (canvas > 0).astype(np.float64)
-        canvas = burt_adelson(canvas, tmp_canvas, mask)
+        # obtenemos las coordenadas
+        # de las esquinas de la nueva imagen que vamos
+        # a pegar
+        current_img_corners_arriba, current_img_corners_abajo = \
+            compute_corner_coordinates(
+                homography,
+                imgs[img_index].shape[:2]
+            )
 
-    return canvas
+        # esta mascara controla donde esta el mosaico
+        # acumulado
+        mask = get_mask_from_corners(size, arriba, abajo)
+        
+        # mascara que controla donde esta la nueva imagen
+        # dentro del canvas
+        tmp_mask = get_mask_from_corners(
+            size,
+            current_img_corners_arriba,
+            current_img_corners_abajo
+        )
+
+        # obtenemos el minimo de ambas mascaras
+        # esto es equivalente a obtener la interseccion de
+        # ambas imagenes
+        shared_mask = np.where(
+            mask < tmp_mask,
+            mask,
+            tmp_mask
+        )
+
+        # obtenemos coordenadas
+        # del mayor rectangulo que podemos introducir
+        # dentro de esa mascara. Es donde haremos
+        # burt-adelson
+        first_row, last_row, first_col, last_col = \
+            compute_largest_rectangle(shared_mask)
+
+        # subimagen del canvas acumulado donde haremos
+        # burt-adelson
+        canvas_to_mix = canvas[
+            first_row:last_row,
+            first_col:last_col
+        ]
+
+        # subimagen del nuevo canvas donde haremos
+        # burt-adelson
+        tmp_canvas_to_mix = tmp_canvas[
+            first_row:last_row,
+            first_col:last_col
+        ]
+
+        # mascara que lleva la mitad del rectangulo
+        # en 1s y la otra en 0. Esta invertida respecto
+        # a la del anterior bucle porque aqui pegamos
+        # las nuevas imagenes a la derecha
+        mask_to_mix = 255 - get_half_mask(
+            first_row,
+            last_row,
+            first_col,
+            last_col
+        )
+
+        # en el canvas resultado podemos pegar todo lo que tenemos
+        # fuera de la zona donde vamos a hacer burt-adelson
+        canvas_[:, :first_col+3] = canvas[:, :first_col+3]
+        canvas_[:, last_col-3:] = tmp_canvas[:, last_col-3:]
+
+        # hacemos burt-adelson en la subimagen
+        # de la que hablabamos
+        roi = float_image_to_uint8(
+            burt_adelson(
+                canvas_to_mix,
+                tmp_canvas_to_mix,
+                mask_to_mix
+            )
+        )
+
+        canvas2 = np.where(canvas2 > tmp_canvas, canvas2, tmp_canvas)
+
+        # ponemos la region de burt-adelson en nuestro canvas
+        canvas_[first_row:last_row, first_col:last_col] = roi
+
+
+
+        canvas = canvas_
+
+        arriba = arriba + [current_img_corners_arriba[1]] 
+        abajo =  abajo + [current_img_corners_abajo[1]]
+
+
+    # devolvemos un canvas con los colores mal mezclados
+    # y otro con los colores bien mezclados para ver la diferencia
+    return canvas, canvas2
+
+def compute_corner_coordinates(homography, size):
+    height, width = size
+
+    apply = lambda p: homography.dot(p + [1]).astype(int)[:2]
+    room = 21
+    
+    top_left = apply([room, room])
+    top_right = apply([width - room, room])
+    bottom_left = apply([room, height-room])
+    bottom_right = apply([width - room, height-room]) # deja un par
+    # de pixeles de sobra para no coger el borde
+
+    return [top_left, top_right], [bottom_left, bottom_right]
 
 def translation_matrix(x, y):
     """Devuelve la matriz de una traslacion"""
@@ -109,13 +343,14 @@ def translation_matrix(x, y):
     ], dtype=float)
 
 def perspective(src, M, size):
+    b = np.zeros(size)
     """Realiza una homografia sobre una imagen de fondo negro"""
     return cv2.warpPerspective(
-         src=src,
-         M=M,
-         dsize=size[::-1],
-         dst=np.zeros(size, dtype=np.float32),
-         borderMode=cv2.BORDER_CONSTANT
+        src=src,
+        M=M,
+        dst=b,
+        dsize=size[::-1],
+        borderMode=cv2.BORDER_CONSTANT
     )
 
 def compute_homographies(imgs):
@@ -169,9 +404,9 @@ def compute_homographies(imgs):
     return homographies
 
 
-guernicas = [
-    imread('../images/guernica{}.jpg'.format(str(i)))
-    for i in range(1, 3)
-]
+# guernicas = [
+#     imread('../images/guernica{}.jpg'.format(str(i)))
+#     for i in range(1, 3)
+# ]
 
-show(mosaic(guernicas))
+# show(mosaic(guernicas))

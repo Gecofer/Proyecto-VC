@@ -69,10 +69,25 @@ def test_mosaic():
     """Computes and displays a mosaic"""
     guernicas = [
         imread('../images/guernica{}.jpg'.format(str(i)))
-        for i in range(1, 3)
+        for i in range(1, 4)
     ]
 
     show(mosaic(guernicas))
+
+def test_mosaic_2():
+    # funcion para cambiar la luminosidad de una imagen
+    lum = lambda img, i: np.where(
+        np.uint32(img) + i*10 < 255,
+        img + i*10,
+        255
+    )
+
+    alhambras = [
+        lum(imread("../images/alhambra{}.jpg".format(str(i))), i)//2
+        for i in range(1, 6)
+    ]
+    
+    show(*mosaic(alhambras)) # mostramos el bueno y el malo
 
 def test_burt_adelson():
     """Computes and displays the algorith Burt and Adelson"""

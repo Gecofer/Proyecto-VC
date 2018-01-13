@@ -9,7 +9,16 @@ from matplotlib.pyplot import imread
 # Implementación: https://github.com/stheakanath/multiresolutionblend/blob/master/main.py
 # Implementación: https://docs.opencv.org/3.1.0/dc/dff/tutorial_py_pyramids.html
 
-def compute_gaussian(img, levels=6):
+normalize = lambda i: cv2.normalize(
+    i,
+    dst=None,
+    alpha=0,
+    beta=1,
+    norm_type=cv2.NORM_MINMAX
+)
+
+
+def compute_gaussian(img, levels=5):
     pyramid = [img]
     acc = img
 
@@ -21,7 +30,7 @@ def compute_gaussian(img, levels=6):
 
 compute_gaussian_pyramid = compute_gaussian
 
-def compute_laplacian1(img, levels=6):
+def compute_laplacian1(img, levels=5):
     g_pyramid = compute_gaussian(img)
     pyramid = []
 
@@ -31,11 +40,11 @@ def compute_laplacian1(img, levels=6):
     return pyramid
 
 # laplacian de tutorial OpenCV
-def compute_laplacian(img, levels=6):
+def compute_laplacian(img, levels=5):
     laplacian = compute_gaussian(img, levels)
-    pyramid = [laplacian[5]]
+    pyramid = [laplacian[levels-1]]
 
-    for i in range(5,0,-1):
+    for i in range(levels-1,0,-1):
         GE = cv2.pyrUp(laplacian[i])
         height, width = laplacian[i-1].shape
         L = cv2.subtract(laplacian[i-1],GE[:height, :width])
@@ -56,7 +65,7 @@ def blend_pipeline(imgA, imgB, mask):
     lSs = []
 
     for lA, lB, G in zip(lAs, lBs, gpMask):
-        lSs.append(G * lA + (1-G) * lB)
+        lSs.append(G*lA + (1-G)*lB)
 
     return collapse(lSs)
 
@@ -88,6 +97,7 @@ def burt_adelson(imgA, imgB, mask):
             imgB[:, :, channel],
             mask[:, :, channel]
         )
+        
         # los tres primero salen bien, pero el ultimo no
         # show(v)
         imgs.append(v)
@@ -96,6 +106,7 @@ def burt_adelson(imgA, imgB, mask):
     imgs = np.dstack(imgs).transpose(2, 1, 0)
 
     # si normalizas sale mal
+
     '''
     return cv2.normalize(
         imgs,
@@ -105,6 +116,7 @@ def burt_adelson(imgA, imgB, mask):
         norm_type=cv2.NORM_MINMAX
     )
     '''
+
     return imgs
 
 
