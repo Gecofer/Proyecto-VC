@@ -89,6 +89,14 @@ def test_mosaic_2():
     
     show(*mosaic(alhambras)) # mostramos el bueno y el malo
 
+def test_myselves():
+    myselves = [
+        imread("../images/myself/medium0{}.jpg".format(i))
+        for i in range(1, 5)
+    ]
+
+    show(*mosaic(myselves))
+
 def test_burt_adelson():
     """Computes and displays the algorith Burt and Adelson"""
     guernica1 = imread("../images/guernica1.jpg")

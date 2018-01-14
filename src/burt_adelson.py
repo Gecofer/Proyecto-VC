@@ -18,7 +18,7 @@ normalize = lambda i: cv2.normalize(
 )
 
 
-def compute_gaussian(img, levels=5):
+def compute_gaussian(img, levels=7):
     pyramid = [img]
     acc = img
 
@@ -30,8 +30,8 @@ def compute_gaussian(img, levels=5):
 
 compute_gaussian_pyramid = compute_gaussian
 
-def compute_laplacian1(img, levels=5):
-    g_pyramid = compute_gaussian(img)
+def compute_laplacian1(img, levels=7):
+    g_pyramid = compute_gaussian(img, levels)
     pyramid = []
 
     for imgIzq, imgDer in zip(g_pyramid, g_pyramid[1:]):
@@ -40,7 +40,7 @@ def compute_laplacian1(img, levels=5):
     return pyramid
 
 # laplacian de tutorial OpenCV
-def compute_laplacian(img, levels=5):
+def compute_laplacian(img, levels=7):
     laplacian = compute_gaussian(img, levels)
     pyramid = [laplacian[levels-1]]
 
@@ -55,12 +55,13 @@ def compute_laplacian(img, levels=5):
 compute_laplacian_pyramid = compute_laplacian
 
 def blend_pipeline(imgA, imgB, mask):
-    gpA = compute_gaussian(imgA)
-    gpB = compute_gaussian(imgB)
-    gpMask = compute_gaussian(mask)
+    levels = 7
+    gpA = compute_gaussian(imgA, levels)
+    gpB = compute_gaussian(imgB, levels)
+    gpMask = compute_gaussian(mask, levels)
 
-    lAs = compute_laplacian(imgA)
-    lBs = compute_laplacian(imgB)
+    lAs = compute_laplacian(imgA, levels)
+    lBs = compute_laplacian(imgB, levels)
 
     lSs = []
 

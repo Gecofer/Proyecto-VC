@@ -136,11 +136,14 @@ def mosaic(imgs):
         
         # esta máscara controla la parte del canvas donde está
         # la nueva imagen colocada
-        tmp_mask = get_mask_from_corners(
-            size,
-            current_img_corners_arriba,
-            current_img_corners_abajo
-        )
+        copy_img = imgs[img_index].copy()
+        copy_img[:,:] = np.array([255, 255, 255])
+        tmp_mask = perspective(copy_img, homography, size)
+        # tmp_mask = get_mask_from_corners(
+        #     size,
+        #     current_img_corners_arriba,
+        #     current_img_corners_abajo
+        # )
 
         # sacamos el mínimo de ambas máscaras, lo que mide
         # por tanto la zona de intersección de ambas imágenes
@@ -184,6 +187,7 @@ def mosaic(imgs):
             last_col
         )
 
+        import pdb; pdb.set_trace()
         # hacemos burt-adelson en la subimagen determinada
         roi = float_image_to_uint8(
             burt_adelson(
@@ -241,11 +245,17 @@ def mosaic(imgs):
         
         # mascara que controla donde esta la nueva imagen
         # dentro del canvas
-        tmp_mask = get_mask_from_corners(
-            size,
-            current_img_corners_arriba,
-            current_img_corners_abajo
-        )
+        copy_img = imgs[img_index].copy()
+        copy_img[:,:] = np.array([255, 255, 255])
+        tmp_mask = perspective(copy_img, homography, size)
+
+        # tmp_mask = get_mask_from_corners(
+        #     size,
+        #     current_img_corners_arriba,
+        #     current_img_corners_abajo
+        # )
+
+        
 
         # obtenemos el minimo de ambas mascaras
         # esto es equivalente a obtener la interseccion de
@@ -324,7 +334,7 @@ def compute_corner_coordinates(homography, size):
     height, width = size
 
     apply = lambda p: homography.dot(p + [1]).astype(int)[:2]
-    room = 21
+    room = 1
     
     top_left = apply([room, room])
     top_right = apply([width - room, room])
