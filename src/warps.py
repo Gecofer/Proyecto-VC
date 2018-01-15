@@ -48,6 +48,7 @@ def cylindrical_warp(img, f=20):
 
     return new_img
 
+
 def spherical_warp(img, f=20):
     """Performs a spherical warp on a given image"""
 
