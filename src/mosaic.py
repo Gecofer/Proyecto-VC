@@ -1,10 +1,8 @@
 import cv2
 import numpy as np
 
-from matplotlib.pyplot import imread
-
 from burt_adelson import burt_adelson
-from util import show
+
 
 def compute_largest_rectangle(mask):
     non_empty_cols = (mask > 0).any(axis=(0, 2))
@@ -20,7 +18,6 @@ def compute_largest_rectangle(mask):
 
     room = -10
     return first_row+room, last_row-room, first_col+room-20, last_col-room+20
-
 
 def get_mask_from_corners(size, arriba, abajo):
     mask = np.uint8(
@@ -64,6 +61,7 @@ def mosaic(imgs):
     # en vez de superponer las imágenes se realiza una
     # mezcla con el algoritmo burt_adelson
 
+    # realizar homografías
     homographies = compute_homographies(imgs)
 
     # comenzamos la creacion del mosaico
@@ -197,7 +195,6 @@ def mosaic(imgs):
             )
         )
 
-        
         canvas2 = np.where(canvas2 > tmp_canvas, canvas2, tmp_canvas)
 
         # actualizamos el canvas con la zona burt-adelson
@@ -254,8 +251,6 @@ def mosaic(imgs):
         #     current_img_corners_arriba,
         #     current_img_corners_abajo
         # )
-
-        
 
         # obtenemos el minimo de ambas mascaras
         # esto es equivalente a obtener la interseccion de
@@ -318,13 +313,10 @@ def mosaic(imgs):
         # ponemos la region de burt-adelson en nuestro canvas
         canvas_[first_row:last_row, first_col:last_col] = roi
 
-
-
         canvas = canvas_
 
         arriba = arriba + [current_img_corners_arriba[1]] 
         abajo =  abajo + [current_img_corners_abajo[1]]
-
 
     # devolvemos un canvas con los colores mal mezclados
     # y otro con los colores bien mezclados para ver la diferencia
@@ -353,8 +345,9 @@ def translation_matrix(x, y):
     ], dtype=float)
 
 def perspective(src, M, size):
-    b = np.zeros(size)
     """Realiza una homografia sobre una imagen de fondo negro"""
+    b = np.zeros(size)
+
     return cv2.warpPerspective(
         src=src,
         M=M,
@@ -412,11 +405,3 @@ def compute_homographies(imgs):
         homographies.append(homography)
 
     return homographies
-
-
-# guernicas = [
-#     imread('../images/guernica{}.jpg'.format(str(i)))
-#     for i in range(1, 3)
-# ]
-
-# show(mosaic(guernicas))
