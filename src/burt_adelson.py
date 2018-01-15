@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-# Implementación: https://docs.opencv.org/3.1.0/dc/dff/tutorial_py_pyramids.html
+# Implementación para las pirámides: https://docs.opencv.org/3.1.0/dc/dff/tutorial_py_pyramids.html
 
 normalize = lambda i: cv2.normalize(
     i,
