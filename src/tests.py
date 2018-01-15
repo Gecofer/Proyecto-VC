@@ -1,10 +1,11 @@
+import cv2
 import numpy as np
 from matplotlib.pyplot import imread
 
 from warps import cylindrical_warp, spherical_warp
 from mosaic import mosaic
 from util import show, plot_images, Image
-from burt_adelson import compute_gaussian_pyramid, compute_laplacian_pyramid, collapse_laplacian_pyramid
+from burt_adelson import compute_gaussian_pyramid, compute_laplacian_pyramid, collapse_laplacian_pyramid, burt_adelson
 
 
 def test_warp():
@@ -17,11 +18,10 @@ def test_warp():
     show(cylindrical_warp(mondrian, f=20))
     show(cylindrical_warp(mondrian, f=400))
 
-    show(spherical_warp(img, f=20))
-    show(spherical_warp(img, f=200))
-    show(spherical_warp(img, f=400))
-    show(spherical_warp(mondrian, f=100))
-    show(spherical_warp(mondrian, f=370))
+    show(spherical_warp(img, f=600))
+
+    show(spherical_warp(mondrian, f=20))
+    show(spherical_warp(mondrian, f=400))
 
 def test_guernica_cylindrical():
     """Computes and displays a cylindrical warp over a image guernica"""
@@ -75,6 +75,8 @@ def test_mosaic():
     show(mosaic(guernicas))
 
 def test_mosaic_2():
+    """Computes and displays a mosaic changing lighting """
+
     # funcion para cambiar la luminosidad de una imagen
     lum = lambda img, i: np.where(
         np.uint32(img) + i*10 < 255,
@@ -90,6 +92,7 @@ def test_mosaic_2():
     show(*mosaic(alhambras)) # mostramos el bueno y el malo
 
 def test_myselves():
+    """Computes and displays mosaic with the algorith Burt and Adelson"""
     myselves = [
         imread("../images/myself/medium0{}.jpg".format(i))
         for i in range(1, 5)
@@ -97,12 +100,17 @@ def test_myselves():
 
     show(*mosaic(myselves))
 
+'''NO FUNCIONA ASÍ'''
 def test_burt_adelson():
     """Computes and displays the algorith Burt and Adelson"""
-    guernica1 = imread("../images/guernica1.jpg")
-    guernica2 = imread("../images/guernica2.jpg")
-    
+    orange = cv2.imread("../images/orange.jpg", 1)
+    orange = cv2.cvtColor(orange, cv2.COLOR_BGR2RGB)
+    apple = cv2.imread("../images/apple.jpg", 1)
+    apple = cv2.cvtColor(apple, cv2.COLOR_BGR2RGB)
+    mask = cv2.imread("../images/mask.jpg", 1)
+    mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
 
+    show(burt_adelson(orange, apple, mask))
 
 def test_gaussian_pyramid():
     """Computes and displays a gaussian pyramid"""
@@ -110,6 +118,7 @@ def test_gaussian_pyramid():
     
     show(*compute_gaussian_pyramid(guernica))
 
+'''NO FUNCIONA ASÍ'''
 def test_laplacian_pyramid():
     """Computes and displays a laplacian pyramid"""
     guernica = imread('../images/guernica3.jpg')
