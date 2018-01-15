@@ -1,12 +1,7 @@
 import cv2
 import numpy as np
 
-from math import floor, sqrt
-from util import show
-from matplotlib.pyplot import imread
 
-
-# Implementación: https://github.com/stheakanath/multiresolutionblend/blob/master/main.py
 # Implementación: https://docs.opencv.org/3.1.0/dc/dff/tutorial_py_pyramids.html
 
 normalize = lambda i: cv2.normalize(
@@ -17,12 +12,15 @@ normalize = lambda i: cv2.normalize(
     norm_type=cv2.NORM_MINMAX
 )
 
-
 def compute_gaussian(img, levels=7):
+    """Realiza una pirámide gaussiano en una imagen dada"""
+
+    # guardamos el primer nivel de la pirámide
     pyramid = [img]
     acc = img
 
     for _ in range(levels):
+        # redimensionar y alisar
         acc = cv2.pyrDown(acc)
         pyramid.append(acc)
 
@@ -30,17 +28,9 @@ def compute_gaussian(img, levels=7):
 
 compute_gaussian_pyramid = compute_gaussian
 
-def compute_laplacian1(img, levels=7):
-    g_pyramid = compute_gaussian(img, levels)
-    pyramid = []
-
-    for imgIzq, imgDer in zip(g_pyramid, g_pyramid[1:]):
-        pyramid.append(imgIzq - cv2.pyrUp(imgDer))
-        
-    return pyramid
-
-# laplacian de tutorial OpenCV
 def compute_laplacian(img, levels=7):
+    """Realiza una pirámide laplaciana en una imagen dada"""
+
     laplacian = compute_gaussian(img, levels)
     pyramid = [laplacian[levels-1]]
 
@@ -54,23 +44,8 @@ def compute_laplacian(img, levels=7):
 
 compute_laplacian_pyramid = compute_laplacian
 
-def blend_pipeline(imgA, imgB, mask):
-    levels = 7
-    gpA = compute_gaussian(imgA, levels)
-    gpB = compute_gaussian(imgB, levels)
-    gpMask = compute_gaussian(mask, levels)
-
-    lAs = compute_laplacian(imgA, levels)
-    lBs = compute_laplacian(imgB, levels)
-
-    lSs = []
-
-    for lA, lB, G in zip(lAs, lBs, gpMask):
-        lSs.append(G*lA + (1-G)*lB)
-
-    return collapse(lSs)
-
-def collapse(pyramid):
+def spline(pyramid):
+    '''Recomponer la imagen colapsando la piramide'''
     prev = pyramid[-1]
 
     for img in reversed(pyramid[:-1]):
@@ -80,11 +55,30 @@ def collapse(pyramid):
 
     return prev
 
-collapse_laplacian_pyramid = collapse
+collapse_laplacian_pyramid = spline
 
+def blend(imgA, imgB, mask):
+    ''' Forma una pirámide combinada con A y B,
+    usando los nodos de la máscara como pesos'''
+
+    levels = 7
+    gpMask = compute_gaussian(mask, levels)
+
+    lAs = compute_laplacian(imgA, levels)
+    lBs = compute_laplacian(imgB, levels)
+
+    lSs = []
+
+    # LS_k(i,j) = GM_k(I,j,)*LA_k(I,j) + (1-GM_k(I,j))*LB_k(I,j)
+    for lA, lB, G in zip(lAs, lBs, gpMask):
+        lSs.append(G*lA + (1-G)*lB)
+
+    return spline(lSs)
+
+'''ESTA FUNCIÓN ESTA IGUAL QUE https://github.com/yrevar/semi_automated_cinemagraph/blob/main/blending_utils.py'''
 def burt_adelson(imgA, imgB, mask):
-    # Convert to double and normalize the images to the range [0..1]
-    # to avoid arithmetic overflow issues
+    # View inputs as arrays with at least three dimensions
+    # and convert to double
     imgA = np.atleast_3d(imgA).astype(np.float) / 255.
     imgB = np.atleast_3d(imgB).astype(np.float) / 255.
     mask = np.atleast_3d(mask).astype(np.float) / 255.
@@ -93,60 +87,15 @@ def burt_adelson(imgA, imgB, mask):
     imgs = []
 
     for channel in range(num_channels):
-        v = blend_pipeline(
+        v = blend(
             imgA[:, :, channel],
             imgB[:, :, channel],
             mask[:, :, channel]
         )
-        
-        # los tres primero salen bien, pero el ultimo no
-        # show(v)
+
         imgs.append(v)
 
     imgs = zip(*imgs)
     imgs = np.dstack(imgs).transpose(2, 1, 0)
 
-    # si normalizas sale mal
-
-    '''
-    return cv2.normalize(
-        imgs,
-        dst=None,
-        alpha=0,
-        beta=255,
-        norm_type=cv2.NORM_MINMAX
-    )
-    '''
-
     return imgs
-
-
-# para leer en blanco y negro pongo un 0
-# y para leer en color pongo un 1 y
-# la linea de cv2.cvtColor
-orange = cv2.imread("../images/orange.jpg", 1)
-orange = cv2.cvtColor(orange, cv2.COLOR_BGR2RGB)
-apple = cv2.imread("../images/apple.jpg", 1)
-apple = cv2.cvtColor(apple, cv2.COLOR_BGR2RGB)
-mask = cv2.imread("../images/mask.jpg", 1)
-mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
-
-# con blanco y negro sale bien
-# show(burt_adelson(orange, apple, mask))
-
-# con esto obtengo la salida que ayer viste
-# se diferencia algo con colores saturados
-#show(blend_pipeline(orange, apple, mask))
-
-# con esto la salida es mala
-# comprobar último nivel de las pirámides
-# show(burt_adelson(orange, apple, mask))
-
-
-# CON ESTO LA SALIDA ES BUENA Y USO
-# (compute_laplacian) DE OPENCV TUTORIAL
-#show(burt_adelson(orange, apple, mask))
-
-
-
-
