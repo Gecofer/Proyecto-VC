@@ -24,8 +24,9 @@ def plot_images(imgs):
     plt.close()
 
 def show(*images):
+    """Para visualizar imágenes"""
+
     plot_images([
         Image(img=img, title='Image')
         for img in images
     ])
-
