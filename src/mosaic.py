@@ -185,8 +185,6 @@ def mosaic(imgs):
             last_col
         )
 
-        import pdb; pdb.set_trace()
-        # hacemos burt-adelson en la subimagen determinada
         roi = float_image_to_uint8(
             burt_adelson(
                 canvas_to_mix,

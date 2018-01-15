@@ -75,27 +75,21 @@ def blend(imgA, imgB, mask):
 
     return spline(lSs)
 
-'''ESTA FUNCIÓN ESTA IGUAL QUE https://github.com/yrevar/semi_automated_cinemagraph/blob/main/blending_utils.py'''
+n_to_float = lambda img: img.astype(np.float)/255
+
 def burt_adelson(imgA, imgB, mask):
-    # View inputs as arrays with at least three dimensions
-    # and convert to double
-    imgA = np.atleast_3d(imgA).astype(np.float) / 255.
-    imgB = np.atleast_3d(imgB).astype(np.float) / 255.
-    mask = np.atleast_3d(mask).astype(np.float) / 255.
-    num_channels = imgB.shape[-1]
+    imgA = n_to_float(imgA)
+    imgB = n_to_float(imgB)
+    mask = n_to_float(mask)
 
-    imgs = []
-
-    for channel in range(num_channels):
-        v = blend(
+    blended_channels = [
+        blend(
             imgA[:, :, channel],
             imgB[:, :, channel],
-            mask[:, :, channel]
+            mask[:,:, channel]
         )
+        for channel in range(len(imgA[0,0]))
+    ]
 
-        imgs.append(v)
 
-    imgs = zip(*imgs)
-    imgs = np.dstack(imgs).transpose(2, 1, 0)
-
-    return imgs
+    return np.array(blended_channels).transpose(1, 2, 0)
