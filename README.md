@@ -22,6 +22,7 @@ en el que se percibirá la diferencia entre usar Burt-Adelson y no usarlo.
 - burt_adelson.py: contiene la implementación el algoritmo de Burt-Adelson
 - mosaic.py: implementación del algoritmo de panorámicas con Burt-Adelson adaptado
 - tests.py: algunas pruebas de visualizaciones que hemos desarrollado
+- main.py: fichero que contiene el código a ejecutar para la demo.
 
 
 
