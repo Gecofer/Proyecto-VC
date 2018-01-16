@@ -79,13 +79,13 @@ def test_mosaic_2():
 
     # funcion para cambiar la luminosidad de una imagen
     lum = lambda img, i: np.where(
-        np.uint32(img) + i*10 < 255,
-        img + i*10,
+        np.uint32(img) + i*20 < 255,
+        img+ i*20,
         255
     )
 
     alhambras = [
-        lum(imread("../images/alhambra{}.jpg".format(str(i))), i)//2
+        lum(imread("../images/alhambra{}.jpg".format(str(i))), i) //2
         for i in range(1, 6)
     ]
     
@@ -99,6 +99,43 @@ def test_myselves():
     ]
 
     show(*mosaic(myselves))
+
+def test_myselves_warped_and_lum():
+    # funcion para cambiar la luminosidad de una imagen
+    lum = lambda img, i: np.where(
+        np.uint32(img) + i*20 < 255,
+        img+ i*20,
+        255
+    )
+    myselves = [
+        cylindrical_warp(
+            lum(imread("../images/myself/medium0{}.jpg".format(i)), i)//2,
+            f=1200
+        )
+        for i in range(1, 5)
+    ]
+    show(*myselves)
+    a = mosaic(myselves)
+
+    show(a[0])
+    show(a[1])
+
+def test_zijing():
+    # funcion para cambiar la luminosidad de una imagen
+    myselves = [
+        cylindrical_warp(
+            imread("../images/zijing/medium0{}.jpg".format(i)),
+            f=1000
+        )
+        for i in range(1, 10)
+    ]
+    show(*myselves)
+    a = mosaic(myselves)
+
+    show(a[0])
+    show(a[1])
+
+
 
 '''NO FUNCIONA ASÍ'''
 def test_burt_adelson():

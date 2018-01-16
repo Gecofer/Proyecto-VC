@@ -61,7 +61,7 @@ def blend(imgA, imgB, mask):
     ''' Forma una pirámide combinada con A y B,
     usando los nodos de la máscara como pesos'''
 
-    levels = 7
+    levels = 6
     gpMask = compute_gaussian(mask, levels)
 
     lAs = compute_laplacian(imgA, levels)

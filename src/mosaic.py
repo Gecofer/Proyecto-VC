@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 from burt_adelson import burt_adelson
-
+from util import show
 
 def compute_largest_rectangle(mask):
     non_empty_cols = (mask > 0).any(axis=(0, 2))
@@ -191,6 +191,13 @@ def mosaic(imgs):
                 tmp_canvas_to_mix,
                 mask_to_mix
             )
+        )
+
+        show(
+            canvas_to_mix,
+            tmp_canvas_to_mix,
+            mask_to_mix,
+            roi
         )
 
         canvas2 = np.where(canvas2 > tmp_canvas, canvas2, tmp_canvas)
